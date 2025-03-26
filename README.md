@@ -1,95 +1,61 @@
 # CodeGenius Backend API
 
-Backend API service for the CodeGenius application, built with Express and deployed on Render.
-
-## Features
-
-- Code execution API endpoint (`/api/execute`)
-- Code fixing/optimization endpoint (`/api/fix`)
-- CORS support for frontend applications
-- Secure API key management with environment variables
-
-## Environment Setup
-
-Create a `.env` file with the following variables:
-
-```
-PORT=4000
-OPENROUTER_API_KEY=your_openrouter_api_key
-ALLOWED_ORIGINS=http://localhost:8080,https://your-frontend-url.vercel.app
-```
-
-## Installation
-
-```bash
-# Install dependencies
-npm install
-
-# Run in development mode
-npm run dev
-
-# Run in production mode
-npm start
-```
+A simple backend API service for the CodeGenius application that handles code execution and code improvement requests.
 
 ## API Endpoints
 
-### 1. Execute Code
+### GET /
+Health check endpoint that returns a simple JSON response indicating the server is running.
 
-**Endpoint:** `POST /api/execute`
+### POST /api/execute
+Executes code using OpenRouter AI API.
 
 **Request Body:**
 ```json
 {
-  "text": "Execute the following Python code: ```python\nprint('Hello, world!')\n```",
-  "language": "python",
-  "temperature": 0.1,
-  "maxTokens": 1024
+  "text": "Execute the following code: ```python\nprint('Hello World')\n```",
+  "language": "python"
 }
 ```
 
 **Response:**
 ```json
 {
-  "text": "Hello, world!",
+  "text": "Output of the code execution...",
   "isError": false
 }
 ```
 
-### 2. Fix Code
-
-**Endpoint:** `POST /api/fix`
+### POST /api/fix
+Analyzes and improves code using OpenRouter AI API.
 
 **Request Body:**
 ```json
 {
-  "text": "Fix the following code: ```python\ndef greet():\nprint('Hello')\n```",
-  "language": "python",
-  "temperature": 0.3,
-  "maxTokens": 1024
+  "text": "def func(a, b):\n  return a + b",
+  "language": "python"
 }
 ```
 
 **Response:**
 ```json
 {
-  "text": "Here's the improved code: [code and explanation]",
+  "text": "Improved code with explanations...",
   "isError": false
 }
 ```
 
-## Deployment on Render
+## Development
 
-1. Create a new Web Service on Render
-2. Link to your GitHub repository
-3. Configure the service:
-   - **Name:** codegenius-backend
-   - **Runtime:** Node
-   - **Build Command:** npm install
-   - **Start Command:** npm start
-4. Add the environment variables mentioned above
-5. Deploy the service
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Create a `.env` file with your OpenRouter API key:
+```
+PORT=4000
+OPENROUTER_API_KEY=your-api-key
+```
+4. Run the server: `npm start`
 
-## Frontend Integration
+## Deployment
 
-Update your frontend API service to use the Render deployed URL as the base URL for API requests. 
+This service is configured to deploy on Render.com. The `render.yaml` file contains the configuration for deployment. 

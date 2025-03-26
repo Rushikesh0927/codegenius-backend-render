@@ -10,8 +10,6 @@ services:
       - key: PORT
         value: 4000
       - key: OPENROUTER_API_KEY
-        sync: false
-      - key: ALLOWED_ORIGINS
-        value: https://codegenius-evolve-5r3iyttko-rushikeshs-projects-8d5b90eb.vercel.app,http://localhost:8080,http://localhost:8081,http://localhost:8082
+        value: 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
     healthCheckPath: /
     autoDeploy: true 
