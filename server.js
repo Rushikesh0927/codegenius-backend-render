@@ -1,7 +1,11 @@
 // This file serves as the entry point for Render deployment
-// It simply requires the main index.js file to run the server
-
 console.log('Starting CodeGenius Backend Server...');
 
-// Load the main application file
-require('./index.js'); 
+// Load the application from app.js
+const app = require('./app.js');
+const PORT = process.env.PORT || 4000;
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`CodeGenius Backend Server is running on port ${PORT}`);
+}); 
