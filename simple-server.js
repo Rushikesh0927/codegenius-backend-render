@@ -1,6 +1,3 @@
-// This file serves as the entry point for Render deployment
-console.log('Starting CodeGenius Backend Server...');
-
 // Import required packages
 const express = require('express');
 const cors = require('cors');
