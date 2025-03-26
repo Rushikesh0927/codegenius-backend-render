@@ -44,6 +44,7 @@ app.get('/', (req, res) => {
 app.post('/api/execute', async (req, res) => {
   try {
     console.log('==== EXECUTE API CALLED ====');
+    console.log('Request body:', req.body);
     
     // Extract parameters from request body
     const { text, language = 'python' } = req.body;
@@ -65,46 +66,72 @@ app.post('/api/execute', async (req, res) => {
       });
     }
     
-    // Call OpenRouter API
-    const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-      model: 'openai/gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert ${language} programmer and code execution environment. 
-                   Execute the code step by step and provide the detailed output.
-                   If there are errors, explain what they are and show error output as it would appear in a console.`
-        },
-        { role: 'user', content: text }
-      ],
-      max_tokens: 1024,
-      temperature: 0.7
-    }, {
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://codegenius.ai',
-        'X-Title': 'CodeGenius'
-      }
-    });
+    console.log('Using API key:', OPENROUTER_API_KEY.substring(0, 10) + '...');
     
-    // Return AI response
-    if (response.data?.choices?.[0]?.message?.content) {
-      return res.json({
-        text: response.data.choices[0].message.content,
-        isError: false
+    try {
+      // Call OpenRouter API
+      console.log('Calling OpenRouter API');
+      
+      const payload = {
+        model: 'openai/gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert ${language} programmer and code execution environment. 
+                     Execute the code step by step and provide the detailed output.
+                     If there are errors, explain what they are and show error output as it would appear in a console.`
+          },
+          { role: 'user', content: text }
+        ],
+        max_tokens: 1024,
+        temperature: 0.7
+      };
+      
+      console.log('OpenRouter payload:', JSON.stringify(payload).substring(0, 200) + '...');
+      
+      const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', payload, {
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://codegenius.ai',
+          'X-Title': 'CodeGenius'
+        }
       });
-    } else {
-      throw new Error('Invalid API response format');
+      
+      console.log('OpenRouter response status:', response.status);
+      
+      // Return AI response
+      if (response.data?.choices?.[0]?.message?.content) {
+        return res.json({
+          text: response.data.choices[0].message.content,
+          isError: false
+        });
+      } else {
+        console.error('Invalid API response format:', response.data);
+        throw new Error('Invalid API response format');
+      }
+    } catch (apiError) {
+      console.error('OpenRouter API error:', apiError.message);
+      console.error('Error details:', apiError.response?.data || 'No response data');
+      
+      // Return a more detailed error message in production
+      return res.status(500).json({
+        text: `Error calling AI service: ${apiError.message}. Please try again later.`,
+        isError: true,
+        errorMessage: apiError.message,
+        errorDetails: apiError.response?.data || 'No error details available'
+      });
     }
   } catch (error) {
     // Log error details
     console.error('Error executing code:', error.message);
+    console.error(error.stack);
     
-    // Return a fallback response on error
-    return res.json({
-      text: 'Mock execution response (API error fallback):\n\nOutput:\nHello, World!',
-      isError: false
+    // Return a more informative error response
+    return res.status(500).json({
+      text: `Error processing your request: ${error.message}. Please try again.`,
+      isError: true,
+      errorMessage: error.message
     });
   }
 });
@@ -117,6 +144,7 @@ app.post('/api/execute', async (req, res) => {
 app.post('/api/fix', async (req, res) => {
   try {
     console.log('==== FIX API CALLED ====');
+    console.log('Request body:', req.body);
     
     // Extract parameters from request body
     const { text, language = 'python' } = req.body;
@@ -138,6 +166,8 @@ app.post('/api/fix', async (req, res) => {
       });
     }
     
+    console.log('Using API key:', OPENROUTER_API_KEY.substring(0, 10) + '...');
+    
     // Create language-specific system prompt
     let systemPrompt = `You are an expert ${language} programmer. Analyze and improve the given code.`;
     
@@ -152,41 +182,65 @@ app.post('/api/fix', async (req, res) => {
       6. Using Pythonic idioms and best practices`;
     }
     
-    // Call OpenRouter API
-    const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-      model: 'openai/gpt-3.5-turbo',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: text }
-      ],
-      max_tokens: 1024,
-      temperature: 0.3
-    }, {
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://codegenius.ai',
-        'X-Title': 'CodeGenius'
-      }
-    });
-    
-    // Return AI response
-    if (response.data?.choices?.[0]?.message?.content) {
-      return res.json({
-        text: response.data.choices[0].message.content,
-        isError: false
+    try {
+      // Call OpenRouter API
+      console.log('Calling OpenRouter API for code fix');
+      
+      const payload = {
+        model: 'openai/gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: text }
+        ],
+        max_tokens: 1024,
+        temperature: 0.3
+      };
+      
+      console.log('OpenRouter payload:', JSON.stringify(payload).substring(0, 200) + '...');
+      
+      const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', payload, {
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://codegenius.ai',
+          'X-Title': 'CodeGenius'
+        }
       });
-    } else {
-      throw new Error('Invalid API response format');
+      
+      console.log('OpenRouter response status:', response.status);
+      
+      // Return AI response
+      if (response.data?.choices?.[0]?.message?.content) {
+        return res.json({
+          text: response.data.choices[0].message.content,
+          isError: false
+        });
+      } else {
+        console.error('Invalid API response format:', response.data);
+        throw new Error('Invalid API response format');
+      }
+    } catch (apiError) {
+      console.error('OpenRouter API error:', apiError.message);
+      console.error('Error details:', apiError.response?.data || 'No response data');
+      
+      // Return a more detailed error message in production
+      return res.status(500).json({
+        text: `Error calling AI service: ${apiError.message}. Please try again later.`,
+        isError: true,
+        errorMessage: apiError.message,
+        errorDetails: apiError.response?.data || 'No error details available'
+      });
     }
   } catch (error) {
     // Log error details
     console.error('Error fixing code:', error.message);
+    console.error(error.stack);
     
-    // Return a fallback response on error
-    return res.json({
-      text: 'I analyzed your code and found some improvements to make:\n\n1. Added proper docstrings\n2. Fixed style issues\n3. Improved error handling\n\n```python\n# Improved code\ndef calculate_sum(numbers):\n    """Calculate the sum of a list of numbers.\n    \n    Args:\n        numbers (list): A list of numeric values\n        \n    Returns:\n        float: The sum of all numbers\n    """\n    if not numbers:\n        return 0\n        \n    return sum(numbers)\n```',
-      isError: false
+    // Return a more informative error response
+    return res.status(500).json({
+      text: `Error processing your request: ${error.message}. Please try again.`,
+      isError: true,
+      errorMessage: error.message
     });
   }
 });
