@@ -10,57 +10,37 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-// Parse allowed origins from environment variable
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',') 
-  : [
-      'http://localhost:8080', 
-      'http://localhost:8081', 
-      'http://localhost:8082', 
-      'https://codegenius-evolve-5r3iyttko-rushikeshs-projects-8d5b90eb.vercel.app',
-      'https://codegenius-evolve.vercel.app',
-      'https://codegenius-evolve-bb1t1kmke-rushikeshs-projects-8d5b90eb.vercel.app',
-      'https://codegenius-evolve-ckic1lant-rushikeshs-projects-8d5b90eb.vercel.app',
-      'https://codegenius-evolve-ccj2isoxz-rushikeshs-projects-8d5b90eb.vercel.app',
-      'https://codegenius-evolve-4u2kk3nfu-rushikeshs-projects-8d5b90eb.vercel.app',
-      'https://codegenius-evolve-ic54z3eeb-rushikeshs-projects-8d5b90eb.vercel.app',
-      'https://codegenius-evolve-h412ohhbk-rushikeshs-projects-8d5b90eb.vercel.app'
-    ];
-
 // Set up CORS middleware with options
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: '*', // Allow all origins during development
   methods: ["GET", "POST", "OPTIONS"],
   credentials: true
 }));
 
 // Parse JSON bodies
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Increase limit for larger code samples
 
 // Handle preflight requests
 app.options('*', cors());
 
 // Root endpoint for health checks
 app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
   res.json({ status: 'ok', message: 'CodeGenius API Server Running' });
 });
 
 // Execute code endpoint
 app.post('/api/execute', async (req, res) => {
   try {
+    console.log('=== API EXECUTE REQUEST ===');
+    console.log('Headers:', JSON.stringify(req.headers));
+    console.log('Origin:', req.headers.origin);
+    
     // Validate input
     const { text, language = 'python', temperature = 0.7, maxTokens = 1024 } = req.body;
     
     if (!text) {
+      console.log('Missing required parameter: text');
       return res.status(400).json({ 
         isError: true, 
         errorMessage: 'Missing required parameter: text' 
@@ -131,10 +111,15 @@ app.post('/api/execute', async (req, res) => {
 // Fix code endpoint
 app.post('/api/fix', async (req, res) => {
   try {
+    console.log('=== API FIX REQUEST ===');
+    console.log('Headers:', JSON.stringify(req.headers));
+    console.log('Origin:', req.headers.origin);
+    
     // Validate input
     const { text, language = 'python', temperature = 0.7, maxTokens = 1024 } = req.body;
     
     if (!text) {
+      console.log('Missing required parameter: text');
       return res.status(400).json({ 
         isError: true, 
         errorMessage: 'Missing required parameter: text' 
