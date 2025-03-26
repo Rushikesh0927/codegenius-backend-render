@@ -13,7 +13,19 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 // Parse allowed origins from environment variable
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',') 
-  : ['http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082', 'https://codegenius-evolve-5r3iyttko-rushikeshs-projects-8d5b90eb.vercel.app'];
+  : [
+      'http://localhost:8080', 
+      'http://localhost:8081', 
+      'http://localhost:8082', 
+      'https://codegenius-evolve-5r3iyttko-rushikeshs-projects-8d5b90eb.vercel.app',
+      'https://codegenius-evolve.vercel.app',
+      'https://codegenius-evolve-bb1t1kmke-rushikeshs-projects-8d5b90eb.vercel.app',
+      'https://codegenius-evolve-ckic1lant-rushikeshs-projects-8d5b90eb.vercel.app',
+      'https://codegenius-evolve-ccj2isoxz-rushikeshs-projects-8d5b90eb.vercel.app',
+      'https://codegenius-evolve-4u2kk3nfu-rushikeshs-projects-8d5b90eb.vercel.app',
+      'https://codegenius-evolve-ic54z3eeb-rushikeshs-projects-8d5b90eb.vercel.app',
+      'https://codegenius-evolve-h412ohhbk-rushikeshs-projects-8d5b90eb.vercel.app'
+    ];
 
 // Set up CORS middleware with options
 app.use(cors({
@@ -149,7 +161,7 @@ app.post('/api/fix', async (req, res) => {
       url: 'https://openrouter.ai/api/v1/chat/completions',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'HTTP-Referer': 'https://codegenius.ai', // Required by OpenRouter
         'X-Title': 'CodeGenius' // Required by OpenRouter
       },
