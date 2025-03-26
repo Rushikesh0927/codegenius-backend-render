@@ -68,6 +68,7 @@ app.post('/api/execute', async (req, res) => {
     }
     
     console.log(`Executing code in ${language}, text length: ${text.length}`);
+    console.log('Using API key:', process.env.OPENROUTER_API_KEY ? 'API key is set' : 'API key is missing');
     
     // Call OpenRouter API
     const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
@@ -104,17 +105,25 @@ app.post('/api/execute', async (req, res) => {
         isError: false
       });
     } else {
+      console.error('Invalid response format:', JSON.stringify(response.data));
       return res.status(500).json({
         isError: true,
         errorMessage: 'Invalid response format from AI service'
       });
     }
   } catch (error) {
-    console.error('Error executing code:', error.response?.data || error.message);
+    console.error('Error executing code:', error.message);
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', JSON.stringify(error.response.data));
+    }
+    if (error.request) {
+      console.error('No response received');
+    }
     
     return res.status(500).json({
       isError: true,
-      errorMessage: error.response?.data?.error?.message || 'Failed to execute code'
+      errorMessage: error.response?.data?.error?.message || error.message || 'Failed to execute code'
     });
   }
 });
@@ -131,6 +140,9 @@ app.post('/api/fix', async (req, res) => {
         errorMessage: 'Missing required parameter: text' 
       });
     }
+
+    console.log(`Fixing code in ${language}, text length: ${text.length}`);
+    console.log('Using API key:', process.env.OPENROUTER_API_KEY ? 'API key is set' : 'API key is missing');
 
     // Create enhanced system prompt based on language
     let systemPrompt = `You are an expert ${language || 'python'} programmer. Analyze and improve the given code.`;
@@ -191,13 +203,22 @@ app.post('/api/fix', async (req, res) => {
         isError: false
       });
     } else {
+      console.error('Invalid response format:', JSON.stringify(data));
       return res.status(500).json({
         isError: true,
         errorMessage: "Unexpected response format from OpenRouter API"
       });
     }
   } catch (error) {
-    console.error("Error processing fix request:", error);
+    console.error("Error processing fix request:", error.message);
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', JSON.stringify(error.response.data));
+    }
+    if (error.request) {
+      console.error('No response received');
+    }
+    
     return res.status(500).json({
       isError: true,
       errorMessage: error.message || "Unknown error occurred"
